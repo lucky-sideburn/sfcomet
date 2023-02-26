@@ -1,0 +1,4 @@
+---
+- name: Safe Comet - Starting playbook for configuring lab sandbox
+  ansible.builtin.debug:
+    msg: Safe Comet - Starting playbook for configuring lab sandbox on {{ inventory_hostname }}

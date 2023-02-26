@@ -1,0 +1,36 @@
+all:
+  children:
+    oort-panel:
+      hosts:
+        default:
+          dev_etc_hosts: true
+          dev_hosts_overrides:
+            grafana.safecomet.local: 192.168.50.111
+            vault.safecomet.local: 192.168.50.111
+            prometheus.safecomet.local: 192.168.50.111
+          ansible_host: 127.0.0.1
+          ansible_port: 2222
+          ansible_ssh_private_key_file: /Users/eugenio/WORK/safecomet-vagrant/.vagrant/machines/default/virtualbox/private_key
+          ansible_user: vagrant
+          fencing: '[''shutdown_linux'': ''shutdown -h now'']'
+          grafana_admin_password: DefaultSafeCometPassword
+          grafana_id: 472
+          grafana_tag: 9.2.8
+          haproxy_id: 99
+          haproxy_tag: 2.7.3
+          prometheus_id: 65534
+          prometheus_tag: v2.37.6
+          vault_id: 100
+          vault_tag: 1.9.10
+          vault_tls_cert_file: /etc/vault/certs/safecomet.local.crt
+          vault_tls_key_file: /etc/vault/certs/safecomet.local.key
+          vault_token: s.TpfHLe72M1DTThvmfcVRSVG5
+          vault_url: https://vault.safecomet.local
+          vault_engine_path: kv
+          vault_validate_certs: false
+          fencing:
+            shutdown_linux: c2h1dGRvd24gLWggbm93Cg==
+    safecomet-sandbox:
+      hosts:
+        default: {}
+    ungrouped: {}

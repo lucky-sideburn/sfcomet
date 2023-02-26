@@ -1,0 +1,4 @@
+---
+- hosts: safecomet-sandbox
+  roles:
+    - safecomet
