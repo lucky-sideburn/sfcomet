@@ -4,8 +4,7 @@
 
 Safecomet release hidden file sentinels across system. If any of them changes, starts fencing procedure.
 
-https://gitlab.com/kernelpanik01/safecomet/-/blob/develop/logos/Safecomet%20Main%20Logo.svg
-![Alt text](./logos/main_logo.svg.svg)
+![Alt text](./logos/main_logo.svg)
 
 ## Agent
 
