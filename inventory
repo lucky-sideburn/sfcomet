@@ -28,8 +28,25 @@ all:
           vault_url: https://vault.safecomet.local
           vault_engine_path: kv
           vault_validate_certs: false
+          observed_nodes: []
           fencing:
             shutdown_linux: c2h1dGRvd24gLWggbm93Cg==
+          comets:
+            - group_name: default_nodes
+              nodes: default
+              path: /tmp/foobar
+              dynamic_sentinel: true
+              fencing: shutdown_linux
+            - group_name: other_default_nodes
+              nodes: default
+              path: /tmp/foobar2
+              dynamic_sentinel: true
+              fencing: shutdown_linux
+            - group_name: other_default_nodes_static_path
+              nodes: default
+              path: /etc/hosts
+              dynamic_sentinel: false
+              fencing: shutdown_linux
     safecomet-sandbox:
       hosts:
         default: {}
