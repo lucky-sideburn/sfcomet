@@ -4,7 +4,7 @@
 
 Safecomet release hidden file sentinels across system. If any of them changes, starts fencing procedure.
 
-![Alt text](./logos/main_logo.svg)
+![Alt text](./logos/logo.png)
 
 ## Agent
 
@@ -50,5 +50,5 @@ For HA and support contact info@safecomet.com
 ```bash
     validate: haproxy -c -f %s
 ```
-* Add handlers for reload containers after changes of their configuation files
+* Add handlers for reload containers after changes of their configuation files or new TLS certs
 * Add logging for HaProxy

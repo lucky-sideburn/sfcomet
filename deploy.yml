@@ -1,4 +1,4 @@
 ---
 - hosts: safecomet-sandbox
   roles:
-    - safecomet
+    - sfcomet
