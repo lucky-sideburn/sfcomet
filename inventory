@@ -12,7 +12,6 @@ all:
           ansible_port: 2222
           ansible_ssh_private_key_file: /Users/eugenio/WORK/safecomet-vagrant/.vagrant/machines/default/virtualbox/private_key
           ansible_user: vagrant
-          fencing: '[''shutdown_linux'': ''shutdown -h now'']'
           grafana_admin_password: DefaultSafeCometPassword
           grafana_id: 472
           grafana_tag: 9.2.8
@@ -24,28 +23,20 @@ all:
           vault_tag: 1.9.10
           vault_tls_cert_file: /etc/vault/certs/safecomet.local.crt
           vault_tls_key_file: /etc/vault/certs/safecomet.local.key
-          vault_token: s.TpfHLe72M1DTThvmfcVRSVG5
+          vault_token: s.9HoNJ15aBFvzrbFBKi74L32T
           vault_url: https://vault.safecomet.local
-          vault_engine_path: kv
+          vault_engine_path: sfcomet
           vault_validate_certs: false
-          observed_nodes: []
+          dead_agent_fencing: c2h1dGRvd24gLWggbm93Cg==
           fencing:
             shutdown_linux: c2h1dGRvd24gLWggbm93Cg==
-          comets:
-            - group_name: default_nodes
-              nodes: default
-              path: /tmp/foobar
-              dynamic_sentinel: true
+            reboot_linux: cmVib290Cg==
+          roles:
+            - name: test1
+              path: [/tmp/test.1, /tmp/test.2]
               fencing: shutdown_linux
-            - group_name: other_default_nodes
-              nodes: default
-              path: /tmp/foobar2
-              dynamic_sentinel: true
-              fencing: shutdown_linux
-            - group_name: other_default_nodes_static_path
-              nodes: default
-              path: /etc/hosts
-              dynamic_sentinel: false
+            - name: test2
+              path: [/tmp/test.3, /tmp/test.4]
               fencing: shutdown_linux
     safecomet-sandbox:
       hosts:

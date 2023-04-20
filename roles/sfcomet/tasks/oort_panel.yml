@@ -216,12 +216,12 @@
 
 - name: Print result of Vault initalization check
   ansible.builtin.debug:
-    msg: "{{ vault_initialized }}"
+    msg: "{{ vault_initialized.stdout }}"
 
 - name: Trigger controlled error when Vault is not initialized
   ansible.builtin.fail:
-    msg: Please initialize Hashicorp Vault and run again Ansible
-  when: vault_initialized == "false"
+    msg: Please initialize Hashicorp Vault and run again Ansible and create a kv engine named {{ vault_engine_path }}
+  when: vault_initialized.stdout == "false"
 
 - name: List of fencing mechanisms to put in Vault
   ansible.builtin.debug:
@@ -255,14 +255,14 @@
     body: { "data": { "base64code": "{{ item['value']}}" }}
   loop: "{{ fencing | dict2items }}"
 
-- name: List of comets to put in Vault
+- name: List of sfcomet roles to put in Vault
   ansible.builtin.debug:
     msg: "{{ item }}"
-  loop: "{{ comets }}"
+  loop: "{{ roles }}"
 
-- name: Put comets in Vault
+- name: Put sfcomet roles in Vault
   ansible.builtin.uri:
-    url: "{{ vault_url }}/v1/{{ vault_engine_path }}/data/comets/{{ item.group_name }}"
+    url: "{{ vault_url }}/v1/{{ vault_engine_path }}/data/roles/{{ item.name }}"
     method: POST
     body_format: json
     status_code: [200, 202]
@@ -271,5 +271,5 @@
     headers:
       Content-Type: application/json
       X-Vault-Token: "{{ vault_token }}"
-    body: { "data": { "nodes": "{{ item.nodes }}", "path": "{{ item.path }}", "dynamic_sentinel": "{{ item.dynamic_sentinel }}", "fencing": "{{ item.fencing}}" }}
-  loop: "{{ comets }}"
+    body: { "data": { "path": "{{ item.path }}", "fencing": "{{ item.fencing}}" }}
+  loop: "{{ roles }}"

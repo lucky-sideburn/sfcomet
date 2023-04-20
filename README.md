@@ -1,21 +1,18 @@
-# Safecomet - Ransomware fencing and remediation system
+# Sfcomet - Ransomware fencing system
 
 ## Description
 
-Safecomet release hidden file sentinels across system. If any of them changes, starts fencing procedure.
+Sfcomet deploy file sentinels across systems. If any of them changes, start custom fencing mechanism.
 
 ![Alt text](./logos/logo.png)
 
 ## Agent
 
-Comet Anget is written in Golang Below the most important things that agent does.
+Sfcomet agent is written in Golang. Below the most important things that agent does.
 
-* Reads from Vault the association between nodes and path to be observed.
-* If the path must be created, it creates a file with random content and store checksum in Vault.
-* If the path already exists into the target system, the path is only put under observation.
-* For each path the agent makes a check between the checksum stored in Vault and the checksum read in-place.
-* If the checksum mimatch, the agent starts the fencing procedure. The speed of this operation is very important. The agent send to Vault that a fencing procedure has been started. The speed in this phase is very important, the timeout to Vault it will be very short. It is better start fencing quickly instead of wait too muuch time.
-
+* Reads the association between nodes and path to be observed from Hashicorp Vault.
+* Checks if the checksum of the deployed files match with the one stored on Hashicorp Vault.
+* The agent starts the fencing mechanism defined on Hashicorp Vault if checksums mismatch.
 ## OORT Panel
 
 The oort panel is composed by multiple tool: Grafana, Prometheus and Hashicorp Vault
@@ -44,6 +41,7 @@ For HA and support contact info@safecomet.com
 
 ## To Do
 
+* https://github.com/hashicorp/vault-client-go is in beta version. Use HTTP request module for calling Vault
 * HaProxy Configuration is not dynamic: pass backend through Ansible variables
 * Add validation for HaProxy configuration file
 
