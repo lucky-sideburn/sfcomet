@@ -10,15 +10,42 @@
 
 - name: Create agent build dir
   ansible.builtin.file:
-    path: /opt/sfcomet
+    path: "{{ agent_build_base_dir }}"
     state: directory
     mode: '0700'
 
 - name: Copy agent source code
   ansible.builtin.copy:
     src: ./agent
-    dest: /opt/sfcomet
+    dest: "{{ agent_build_base_dir }}"
     directory_mode: true
     owner: root
     group: root
     mode: '0700'
+
+- name: Copy Vault CA
+  ansible.builtin.copy:
+    src: ./agent/safecomet_bundle.pem
+    dest: "{{ agent_vault_ca_path }}"
+    directory_mode: true
+    owner: root
+    group: root
+    mode: '0700'
+
+- name: Agent build - customize binary
+  ansible.builtin.template:
+    src: agent/main.go
+    dest: "{{ agent_build_base_dir }}/agent/main.go"
+    owner: "{{ prometheus_id }}"
+    group: "{{ prometheus_id }}"
+    mode: '0755'
+
+- name: Agent build - go fmt
+  ansible.builtin.shell: go fmt main.go
+  args:
+    chdir: "{{ agent_build_base_dir }}/agent"
+
+- name: Agent build - go build
+  ansible.builtin.shell: go build -o sfagent main.go
+  args:
+    chdir: "{{ agent_build_base_dir }}/agent"

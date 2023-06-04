@@ -4,11 +4,16 @@ import (
 	"bufio"
 	"context"
 	"crypto/rand"
+	"crypto/sha256"
+	"encoding/hex"
 	"flag"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	vault "github.com/hashicorp/vault-client-go"
 )
@@ -26,7 +31,7 @@ func Keys(m map[string]interface{}) (keys []string) {
 	return keys
 }
 
-func writeOutputToFile(output string, outputFile string) error {
+func writeOutputToFile(output []byte, outputFile string) error {
 	file, err := os.Create(outputFile)
 	if err != nil {
 		return err
@@ -119,13 +124,65 @@ func main() {
 
 	log.Println(cometList)
 
-	for _, comet := range cometList {
-		for _, fileSentinel := range comet.path {
-			log.Println("Creating sentinel file:", fileSentinel)
-			writeOutputToFile("foobar", fileSentinel)
-			var p [8]byte
-			log.Println(rand.Read(p[:]))
-		}
-	}
+	for true {
+		for _, comet := range cometList {
+			for _, fileSentinel := range comet.path {
+				if _, err := os.Stat(fileSentinel); err == nil {
+					log.Printf("File sentinel %s already exists", fileSentinel)
+					log.Printf("Reading checksum of %s from Vault", fileSentinel)
+					vaultPath := "/sfcomet/data/sentinels/" + fileSentinel
 
+					secret, err := client.Read(
+						ctx,
+						vaultPath,
+					)
+					if err != nil {
+						log.Fatal(err)
+					}
+					secretData := secret.Data["data"]
+					secretMap := secretData.(map[string]interface{})
+					log.Printf("Checksum of %s read from Vault: %s", fileSentinel, secretMap["checksum"].(string))
+
+					f, err := os.Open(fileSentinel)
+					if err != nil {
+						log.Fatal(err)
+					}
+					defer f.Close()
+
+					h := sha256.New()
+					if _, err := io.Copy(h, f); err != nil {
+						log.Fatal(err)
+					}
+					localChecksum := hex.EncodeToString(h.Sum(nil))
+
+					log.Printf("Local checksum of %s is %s", fileSentinel, localChecksum)
+
+				} else {
+					token := make([]byte, 4)
+					rand.Read(token)
+					log.Println("Creating sentinel file:", fileSentinel)
+					randBuff := make([]byte, 1024)
+					rand.Read(randBuff)
+					ioutil.WriteFile(fileSentinel, randBuff, 0666)
+					sum := sha256.Sum256(randBuff)
+					checksum_string := hex.EncodeToString(sum[:])
+					log.Printf("Checksum of %s is %s", fileSentinel, checksum_string)
+
+					vaultPath := "/sfcomet/data/sentinels/" + fileSentinel
+
+					_, err = client.Write(ctx, vaultPath, map[string]any{
+						"data": map[string]any{
+							"checksum": checksum_string,
+						},
+					})
+
+					if err != nil {
+						log.Fatal(err)
+					}
+					log.Println("secret written successfully")
+				}
+			}
+		}
+		time.Sleep(time.Second)
+	}
 }
