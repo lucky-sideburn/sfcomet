@@ -23,9 +23,9 @@ all:
           vault_tag: 1.9.10
           vault_tls_cert_file: /etc/vault/certs/safecomet.local.crt
           vault_tls_key_file: /etc/vault/certs/safecomet.local.key
-          vault_token: s.9HoNJ15aBFvzrbFBKi74L32T
+          vault_token: s.16dXNCCdxWlk3NKGV5MX6mi4
           vault_url: https://vault.safecomet.local
-          vault_engine_path: sfcomet
+          vault_engine_name: sfcomet
           vault_validate_certs: false
           dead_agent_fencing: c2h1dGRvd24gLWggbm93Cg==
           fencing:

@@ -3,6 +3,10 @@
   ansible.builtin.debug:
     msg: Safe Comet - Starting playbook for configuring OORT Panel on {{ inventory_hostname }}
 
+- name: Print inventory_hostname
+  ansible.builtin.debug:
+    msg: "{{ inventory_hostname }}"
+
 - name: Installing podman
   package:
     name: "podman"
@@ -214,21 +218,53 @@
   register: vault_initialized
   ignore_errors: true
 
-- name: Print result of Vault initalization check
+- name: Print result of Vault initialization check
   ansible.builtin.debug:
     msg: "{{ vault_initialized.stdout }}"
 
 - name: Trigger controlled error when Vault is not initialized
   ansible.builtin.fail:
-    msg: Please initialize Hashicorp Vault and run again Ansible and create a kv engine named {{ vault_engine_path }}
+    msg: Please initialize Hashicorp Vault (vault operator init..) and run again Ansible
   when: vault_initialized.stdout == "false"
+
+- name: Check if kv engine exists
+  ansible.builtin.uri:
+    url: "{{ vault_url }}/v1/sys/mounts/{{ vault_engine_name }}/tune"
+    method: GET
+    body_format: json
+    status_code: [200,503]
+    return_content: true
+    validate_certs: "{{ vault_validate_certs }}"
+    headers:
+      Content-Type: application/json
+      X-Vault-Token: "{{ vault_token }}"
+  register: kv_check
+
+- name: Trigger controlled error when Vault is not working correctly or sealed
+  ansible.builtin.fail:
+    msg: The last http request to Vault returns 503. Please check if it is sealed
+  when: kv_check.status == 503
+
+- name: Create kv engine
+  ansible.builtin.uri:
+    url: "{{ vault_url }}/v1/sys/mounts/{{ vault_engine_name }}"
+    method: POST
+    body_format: json
+    status_code: [204]
+    return_content: true
+    validate_certs: "{{ vault_validate_certs }}"
+    headers:
+      Content-Type: application/json
+      X-Vault-Token: "{{ vault_token }}"
+    body: { "type": "kv" }
+  when: kv_check.status != 200
 
 - name: List of fencing mechanisms to put in Vault
   ansible.builtin.debug:
     msg: "{{ item }}"
   loop: "{{ fencing | dict2items }}"
 
-- name: Only for development purporse - Add records to /etc/hosts
+- name: Only for development purpose - Add records to /etc/hosts
   ansible.builtin.lineinfile:
     path: /etc/hosts
     regexp: ^{{ item['value'] }} {{ item['key'] }}$
@@ -243,10 +279,10 @@
 
 - name: Put fencing mechanism in Vault
   ansible.builtin.uri:
-    url: "{{ vault_url }}/v1/{{ vault_engine_path }}/data/fencing/{{ item['key'] }}"
+    url: "{{ vault_url }}/v1/{{ vault_engine_name }}/data/fencing/{{ item['key'] }}"
     method: POST
     body_format: json
-    status_code: [200, 202]
+    status_code: [200, 202, 204]
     return_content: true
     validate_certs: "{{ vault_validate_certs }}"
     headers:
@@ -262,10 +298,10 @@
 
 - name: Put sfcomet roles in Vault
   ansible.builtin.uri:
-    url: "{{ vault_url }}/v1/{{ vault_engine_path }}/data/roles/{{ item.name }}"
+    url: "{{ vault_url }}/v1/{{ vault_engine_name }}/data/roles/{{ item.name }}"
     method: POST
     body_format: json
-    status_code: [200, 202]
+    status_code: [200, 202, 204]
     return_content: true
     validate_certs: "{{ vault_validate_certs }}"
     headers:

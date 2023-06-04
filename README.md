@@ -13,6 +13,7 @@ Sfcomet agent is written in Golang. Below the most important things that agent d
 * Reads the association between nodes and path to be observed from Hashicorp Vault.
 * Checks if the checksum of the deployed files match with the one stored on Hashicorp Vault.
 * The agent starts the fencing mechanism defined on Hashicorp Vault if checksums mismatch.
+
 ## OORT Panel
 
 The oort panel is composed by multiple tool: Grafana, Prometheus and Hashicorp Vault
@@ -30,6 +31,43 @@ Example:
     fencing/shutdown_database_service => base64code: <base64 of database shutdown command>
 
 ![Alt Text](./doc_images/fencing_item_example.png)
+
+## Installing OORT Panel - Development Mode
+
+```bash
+cd sfcomet
+
+vagrant up
+
+# The first time of execution requires Vault init
+#TASK [sfcomet : Trigger controlled error when Vault is not initialized] ********
+#fatal: [default]: FAILED! => {"changed": false, "msg": "Please initialize Hashicorp Vault and run again Ansible and create a kv engine named sfcomet"}
+
+podman exec -it vault sh
+export VAULT_SKIP_VERIFY=true && vault operator init -recovery-shares=5 -recovery-threshold=3
+
+# Unseal Vault
+vault operator unseal
+
+# Check if Sealed is false
+# Unseal Key (will be hidden):
+# Key             Value
+# ---             -----
+# Seal Type       shamir
+# Initialized     true
+# Sealed          false
+# Total Shares    5
+# Threshold       3
+# Version         1.9.10
+# Storage Type    file
+# Cluster Name    vault-cluster-113bd094
+# Cluster ID      72dc99ba-6e91-8c89-c56d-b5b99d4e1293
+# HA Enabled      false
+
+# Take the root token of Vault or create one ad-hoc and valorize the variable vault_token into the Ansible Inventory
+
+```
+
 
 ## Comet Prometheus Exporter
 
