@@ -70,11 +70,11 @@ var cometList []Comet
 func main() {
 	ctx := context.Background()
 	log.Println("Starting sfagent agent")
-	vaultTokenPtr := flag.String("token", "", "Vault Token")
-	vaultAddressPtr := flag.String("address", "http://127.0.0.1:8200", "Vault Address")
+	vaultTokenPtr := flag.String("token", "{{ vault_token }}", "Vault Token")
+	vaultAddressPtr := flag.String("address", "{{ vault_url }}", "Vault Address")
 	vaultEnableTls := flag.Bool("use-tls", true, "Use TLS (example: -use-tls=false)")
-	vaultTlsCaPath := flag.String("ca-file", "./rootCA.crt", "CA cert path (example: -ca-file=./rootCA.crt)")
-	roles := flag.String("roles", "", "Define the roles of the node  (example: -roles=default or -roles=default,database)")
+	vaultTlsCaPath := flag.String("ca-file", "{{ agent_vault_ca_path }}", "CA cert path (example: -ca-file=./rootCA.crt)")
+	roles := flag.String("roles", "{{ agent_active_roles }}", "Define the roles of the node  (example: -roles=default or -roles=default,database)")
 
 	flag.Parse()
 
@@ -122,7 +122,6 @@ func main() {
 	for _, comet := range cometList {
 		for _, fileSentinel := range comet.path {
 			log.Println("Creating sentinel file:", fileSentinel)
-
 			writeOutputToFile("foobar", fileSentinel)
 			var p [8]byte
 			log.Println(rand.Read(p[:]))
