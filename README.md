@@ -1,22 +1,37 @@
-# Sfcomet - Ransomware fencing system
+# SFComet - Ransomware fencing system
 
 ## Description
 
-Sfcomet deploy file sentinels across systems. If any of them changes, start custom fencing mechanism.
+SFComet deploy file sentinels and ransomware remediation agent across target systems.
+
+If any sentinel files of change, the agent starts fencing mechanism.
 
 ![Alt text](./logos/logo.png)
 
+## Ansible Roles and Playbook
+
+Playbooks and roles do the following things:
+
+1. Install and configure Grafana, Prometheus and Vault via Ansible to the OORT Panel server
+2. Build and deploy SFComet Agent
+
 ## Agent
 
-Sfcomet agent is written in Golang. Below the most important things that agent does.
+SFComet agent is written in Golang. Below the most important things that agent does.
 
 * Reads the association between nodes and path to be observed from Hashicorp Vault.
 * Checks if the checksum of the deployed files match with the one stored on Hashicorp Vault.
 * The agent starts the fencing mechanism defined on Hashicorp Vault if checksums mismatch.
 
+
 ## OORT Panel
 
-The oort panel is composed by multiple tool: Grafana, Prometheus and Hashicorp Vault
+The OORTPanel Box does the following things:
+
+1. Run Grafana, Prometheus and Vault through Podman
+2. Build server for the SFComet Agent
+
+The OORT panel is composed by multiple tool: Grafana, Prometheus and Hashicorp Vault
 
 * (Ansible) Define the association between node name and observed path (Vault folder comets/<node_name>)
 
@@ -40,10 +55,12 @@ cd sfcomet
 vagrant up
 
 # The first time of execution requires Vault init
-#TASK [sfcomet : Trigger controlled error when Vault is not initialized] ********
-#fatal: [default]: FAILED! => {"changed": false, "msg": "Please initialize Hashicorp Vault and run again Ansible and create a kv engine named sfcomet"}
+#TASK [SFComet : Trigger controlled error when Vault is not initialized] ********
+#fatal: [default]: FAILED! => {"changed": false, "msg": "Please initialize Hashicorp Vault and run again Ansible and create a kv engine named SFComet"}
 
 podman exec -it vault sh
+
+# Please do not use VAULT_SKIP_VERIFY for production environments
 export VAULT_SKIP_VERIFY=true && vault operator init -recovery-shares=5 -recovery-threshold=3
 
 # Unseal Vault

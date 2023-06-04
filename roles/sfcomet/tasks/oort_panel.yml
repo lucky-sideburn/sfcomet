@@ -7,6 +7,14 @@
   ansible.builtin.debug:
     msg: "{{ inventory_hostname }}"
 
+- name: Only for development purpose - Add records to /etc/hosts
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: ^{{ item['value'] }} {{ item['key'] }}$
+    line: "{{ item['value'] }} {{ item['key'] }}"
+  loop: "{{ dev_hosts_overrides | dict2items }}"
+  when: dev_etc_hosts | bool
+
 - name: Installing podman
   package:
     name: "podman"
@@ -232,7 +240,7 @@
     url: "{{ vault_url }}/v1/sys/mounts/{{ vault_engine_name }}/tune"
     method: GET
     body_format: json
-    status_code: [200,503]
+    status_code: [200, 400, 503]
     return_content: true
     validate_certs: "{{ vault_validate_certs }}"
     headers:
@@ -257,20 +265,12 @@
       Content-Type: application/json
       X-Vault-Token: "{{ vault_token }}"
     body: { "type": "kv" }
-  when: kv_check.status != 200
+  when: kv_check.status == 400
 
 - name: List of fencing mechanisms to put in Vault
   ansible.builtin.debug:
     msg: "{{ item }}"
   loop: "{{ fencing | dict2items }}"
-
-- name: Only for development purpose - Add records to /etc/hosts
-  ansible.builtin.lineinfile:
-    path: /etc/hosts
-    regexp: ^{{ item['value'] }} {{ item['key'] }}$
-    line: "{{ item['value'] }} {{ item['key'] }}"
-  loop: "{{ dev_hosts_overrides | dict2items }}"
-  when: dev_etc_hosts | bool
 
 - name: List of fencing mechanisms to put in Vault
   ansible.builtin.debug:

@@ -1,11 +1,10 @@
 Vagrant.configure("2") do |config|
-  config.vm.define 'oortpanel' do |c|
+  config.vm.define 'oortpanel' do |oortpanel|
     oortpanel.vm.box = "generic/oracle8"
     oortpanel.vbguest.auto_update = false
 
     oortpanel.vm.network "private_network", ip: "192.168.50.111"
     oortpanel.vm.hostname = "oortpanel"
-    oortpanel.vm.n = "oortpanel"
 
     oortpanel.vm.provision "ansible" do |ansible|
       ansible.playbook = "./deploy.yml"
@@ -19,3 +18,4 @@ Vagrant.configure("2") do |config|
   end
 
 end
+

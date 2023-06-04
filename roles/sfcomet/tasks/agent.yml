@@ -1,0 +1,24 @@
+---
+- name: Playbook Start Message
+  ansible.builtin.debug:
+    msg: Starting playbook for build and deploy SFComet Agent {{ inventory_hostname }}
+
+- name: Installing Golang
+  package:
+    name: "golang"
+    state: present
+
+- name: Create agent build dir
+  ansible.builtin.file:
+    path: /opt/sfcomet
+    state: directory
+    mode: '0700'
+
+- name: Copy agent source code
+  ansible.builtin.copy:
+    src: ./agent
+    dest: /opt/sfcomet
+    directory_mode: true
+    owner: root
+    group: root
+    mode: '0700'
