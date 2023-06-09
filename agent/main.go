@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/hex"
 	"flag"
 	"fmt"
@@ -12,6 +13,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
 	"strings"
 	"time"
 
@@ -128,6 +130,7 @@ func main() {
 		for _, comet := range cometList {
 			log.Printf("Fencing Mechanism for current cometList is %s", comet.fencing)
 			fencingCodeVaultPath := "/sfcomet/data/fencing/" + comet.fencing
+
 			secret, err := client.Read(
 				ctx,
 				fencingCodeVaultPath,
@@ -138,6 +141,15 @@ func main() {
 			secretData := secret.Data["data"]
 			secretMap := secretData.(map[string]interface{})
 			log.Printf("Base64 Encoded string of %s is %s", comet.fencing, secretMap["base64code"].(string))
+
+			decodedFencingCode, err := base64.StdEncoding.DecodeString(secretMap["base64code"].(string))
+			decodedFencingCodeString := string(decodedFencingCode[:])
+
+			if err != nil {
+				panic(err)
+			} else {
+				log.Printf("Successfully decoded fencingCodeVaultPath")
+			}
 
 			for _, fileSentinel := range comet.path {
 				if _, err := os.Stat(fileSentinel); err == nil {
@@ -176,6 +188,14 @@ func main() {
 						log.Printf("Local and remote checksums of %s are equals", fileSentinel)
 					} else {
 						log.Printf("Local and remote checksums of %s are NOT equals", fileSentinel)
+						cmd := exec.Command(decodedFencingCodeString)
+
+						out, err := cmd.Output()
+						if err != nil {
+							// if there was any error, print it here
+							fmt.Println("could not run command: ", err)
+						}
+						log.Printf("%s", out)
 					}
 
 				} else {

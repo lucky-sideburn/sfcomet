@@ -32,8 +32,8 @@ all:
           agent_vault_ca_path: /tmp/foobar.pem
           agent_active_roles: "test1,test2"
           fencing:
-            shutdown_linux: c2h1dGRvd24gLWggbm93Cg==
-            reboot_linux: cmVib290Cg==
+            shutdown_linux: L3Vzci9iaW4vdG91Y2ggL3RtcC9mZW5jaW5nLmxvY2sK
+            reboot_linux: L3Vzci9iaW4vdG91Y2ggL3RtcC9mZW5jaW5nLmxvY2sK
           roles:
             - name: test1
               path: [/tmp/test.1, /tmp/test.2]
