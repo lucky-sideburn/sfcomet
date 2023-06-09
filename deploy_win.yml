@@ -1,0 +1,5 @@
+---
+- hosts: windows_servers
+  roles:
+    - sfagent_deploy
+

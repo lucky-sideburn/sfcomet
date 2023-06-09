@@ -6,3 +6,4 @@
 - hosts: linux_nodes
   roles:
     - sfagent_deploy
+

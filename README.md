@@ -9,11 +9,18 @@ If any sentinel files changes, the agent starts fencing mechanism.
 ![Alt text](./logos/logo.png)
 
 ## Ansible Roles and Playbook
-
-Playbooks and roles do the following things:
+### deploy_oort.yml
 
 1. Install and configure Grafana, Prometheus and Vault via Ansible to the OORT Panel server
 2. Build and deploy SFComet Agent
+
+### deploy_win.yml
+
+Installs SFAgent on Windows hosts
+
+### deploy_linux.yml
+
+Installs SFAgent on Linux host
 
 ## Agent
 
