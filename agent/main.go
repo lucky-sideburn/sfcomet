@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"crypto/rand"
 	"crypto/sha256"
@@ -19,6 +20,18 @@ import (
 
 	vault "github.com/hashicorp/vault-client-go"
 )
+
+const ShellToUse = "bash"
+
+func Shellout(command string) (string, string, error) {
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	cmd := exec.Command(ShellToUse, "-c", command)
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+	return stdout.String(), stderr.String(), err
+}
 
 type Comet struct {
 	path             []string
@@ -76,7 +89,7 @@ var cometList []Comet
 
 func main() {
 	ctx := context.Background()
-	log.Println("Starting sfagent agent")
+	log.Println("Starting SFAgent...")
 	vaultTokenPtr := flag.String("token", "{{ vault_token }}", "Vault Token")
 	vaultAddressPtr := flag.String("address", "{{ vault_url }}", "Vault Address")
 	vaultEnableTls := flag.Bool("use-tls", true, "Use TLS (example: -use-tls=false)")
@@ -126,6 +139,12 @@ func main() {
 
 	log.Println(cometList)
 
+	hostname, err := os.Hostname()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
 	for true {
 		for _, comet := range cometList {
 			log.Printf("Fencing Mechanism for current cometList is %s", comet.fencing)
@@ -155,7 +174,8 @@ func main() {
 				if _, err := os.Stat(fileSentinel); err == nil {
 					log.Printf("File sentinel %s already exists", fileSentinel)
 					log.Printf("Reading checksum of %s from Vault", fileSentinel)
-					vaultPath := "/sfcomet/data/sentinels/" + fileSentinel
+
+					vaultPath := "/sfcomet/data/sentinels/" + hostname + "/" + fileSentinel
 
 					secret, err := client.Read(
 						ctx,
@@ -188,14 +208,14 @@ func main() {
 						log.Printf("Local and remote checksums of %s are equals", fileSentinel)
 					} else {
 						log.Printf("Local and remote checksums of %s are NOT equals", fileSentinel)
-						cmd := exec.Command(decodedFencingCodeString)
 
-						out, err := cmd.Output()
+						_, _, err := Shellout(strings.TrimSpace(decodedFencingCodeString))
+
 						if err != nil {
-							// if there was any error, print it here
-							fmt.Println("could not run command: ", err)
+							log.Printf("error: %v\n", err)
+						} else {
+							log.Printf("Fencing code executed!")
 						}
-						log.Printf("%s", out)
 					}
 
 				} else {
@@ -209,7 +229,7 @@ func main() {
 					checksum_string := hex.EncodeToString(sum[:])
 					log.Printf("Checksum of %s is %s", fileSentinel, checksum_string)
 
-					vaultPath := "/sfcomet/data/sentinels/" + fileSentinel
+					vaultPath := "/sfcomet/data/sentinels/" + hostname + "/" + fileSentinel
 
 					_, err = client.Write(ctx, vaultPath, map[string]any{
 						"data": map[string]any{
