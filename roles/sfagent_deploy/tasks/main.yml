@@ -1,0 +1,12 @@
+---
+- name: Safe Comet - Starting playbook for deploying agent
+  ansible.builtin.debug:
+    msg: Safe Comet - Starting playbook for deploying agent from {{ inventory_hostname }}
+
+- name: Generate random string with length 12
+  ansible.builtin.set_fact:
+    random_string: "{{ lookup('community.general.random_string', length=12, lower=true, special=false) }}"
+
+- name: Print generated random string
+  ansible.builtin.debug:
+    msg: "{{ random_string }}"

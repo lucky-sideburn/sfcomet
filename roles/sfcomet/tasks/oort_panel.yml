@@ -291,12 +291,12 @@
     body: { "data": { "base64code": "{{ item['value']}}" }}
   loop: "{{ fencing | dict2items }}"
 
-- name: List of sfcomet roles to put in Vault
+- name: List of SFComet roles to put in Vault
   ansible.builtin.debug:
     msg: "{{ item }}"
   loop: "{{ roles }}"
 
-- name: Put sfcomet roles in Vault
+- name: Put SFComet roles in Vault
   ansible.builtin.uri:
     url: "{{ vault_url }}/v1/{{ vault_engine_name }}/data/roles/{{ item.name }}"
     method: POST

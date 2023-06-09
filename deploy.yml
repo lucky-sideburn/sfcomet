@@ -1,4 +1,8 @@
 ---
-- hosts: safecomet-sandbox
+# - hosts: safecomet-sandbox
+#   roles:
+#     - sfcomet
+
+- hosts: linux_nodes
   roles:
-    - sfcomet
+    - sfagent_deploy

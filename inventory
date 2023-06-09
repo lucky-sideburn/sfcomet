@@ -29,6 +29,7 @@ all:
           vault_validate_certs: false
           dead_agent_fencing: c2h1dGRvd24gLWggbm93Cg==
           agent_build_base_dir: /opt/sfcomet
+          agent_install_dir: /opt/sfcomet
           agent_vault_ca_path: /tmp/foobar.pem
           agent_active_roles: "test1,test2"
           fencing:
@@ -42,6 +43,9 @@ all:
               path: [/tmp/test.3, /tmp/test.4]
               fencing: reboot_linux
     safecomet-sandbox:
+      hosts:
+        oortpanel: {}
+    linux_nodes:
       hosts:
         oortpanel: {}
     ungrouped: {}
