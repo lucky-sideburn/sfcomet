@@ -2,9 +2,9 @@
 
 ## Description
 
-SFComet deploy file sentinels and ransomware remediation agent across target systems.
+SFComet deploys file sentinels across systems for ransomware attack remediation.
 
-If any sentinel files of change, the agent starts fencing mechanism.
+If any sentinel files changes, the agent starts fencing mechanism.
 
 ![Alt text](./logos/logo.png)
 
@@ -32,20 +32,6 @@ The OORTPanel Box does the following things:
 2. Build server for the SFComet Agent
 
 The OORT panel is composed by multiple tool: Grafana, Prometheus and Hashicorp Vault
-
-* (Ansible) Define the association between node name and observed path (Vault folder comets/<node_name>)
-
-Example:
-    webserver01:already_present:/data/mydb/myfile.db <checksum>
-    webserver01:fencing_procedure:/data/mydb/myfile.db <fencing_procedure>
-
-* (Ansible) Defines fencing procedure into the Vault folder "fencing"
-
-Example:
-    fencing/shutdown_linux => base64code: <base64 of shutdown command>
-    fencing/shutdown_database_service => base64code: <base64 of database shutdown command>
-
-![Alt Text](./doc_images/fencing_item_example.png)
 
 ## Installing OORT Panel - Development Mode
 
