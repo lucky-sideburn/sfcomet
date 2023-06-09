@@ -88,3 +88,20 @@
     dest: "/opt/{{ random_string }}/{{ random_string }}"
     owner: "{{ random_string }}"
     mode: '0700'
+
+- name: Setting fact for template
+  ansible.builtin.set_fact:
+    unit_user: "{{ random_string }}"
+    exec_start: "/opt/{{ random_string }}/{{ random_string }}"
+
+- name: Create Systemd unit file
+  ansible.builtin.template:
+    src: templates/sfagent.service.j2
+    dest: "/lib/systemd/system/{{ unit_user }}.service"
+    owner: "{{ random_string }}"
+    mode: '0755'
+
+- name: "Start {{ random_string }} service"
+  systemd:
+    name: "{{ random_string }}"
+    state: started

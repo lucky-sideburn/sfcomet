@@ -29,7 +29,7 @@ SFComet agent is written in Golang. Below the most important things that agent d
 The OORTPanel Box does the following things:
 
 1. Run Grafana, Prometheus and Vault through Podman
-2. Build server for the SFComet Agent
+2. Build server for the SFComet Agent. The agent is always different in order to be detectd by checksum and does not use args in order to not view some information by listing processes.
 
 The OORT panel is composed by multiple tool: Grafana, Prometheus and Hashicorp Vault
 
