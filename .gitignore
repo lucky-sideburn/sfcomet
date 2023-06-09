@@ -1,5 +1,6 @@
 # General
 .vagrant/
 vault.secrets
+./compiled_agents/*
 # Log files (if you are creating logs in debug mode, uncomment this)
 # *.log

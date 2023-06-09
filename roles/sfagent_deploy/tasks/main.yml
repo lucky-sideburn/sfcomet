@@ -3,10 +3,88 @@
   ansible.builtin.debug:
     msg: Safe Comet - Starting playbook for deploying agent from {{ inventory_hostname }}
 
+- name: Check if random code already exists in Vault
+  ansible.builtin.uri:
+    url: "{{ vault_url }}/v1/{{ vault_engine_name }}/data/sentinels/{{ ansible_hostname }}/attrs"
+    method: GET
+    body_format: json
+    status_code: [200, 400, 503]
+    return_content: true
+    validate_certs: "{{ vault_validate_certs }}"
+    headers:
+      Content-Type: application/json
+      X-Vault-Token: "{{ vault_token }}"
+  register: random_code_check
+
+- name: Print random_code_check
+  ansible.builtin.debug:
+    msg: "{{ random_code_check }}"
+
+- name: Print random_code
+  ansible.builtin.debug:
+    msg: "Random code is has been not found in Vault. New random code will be generated"
+  when: random_code_check.status == 400
+
+- name: Print random_code
+  ansible.builtin.debug:
+    msg: "{{ random_code_check['json']['data']['data']['random_code'] }}"
+  when: random_code_check.status == 400
+
+- name: Print random_code
+  ansible.builtin.debug:
+    msg: "Random code is already stored in Vault. New random code will not be generated"
+  when: random_code_check.status == 200
+
+- name: Use already generated random code stored in Vault
+  ansible.builtin.set_fact:
+    random_string: "{{ random_code_check['json']['data']['data']['random_code'] }}"
+  when: random_code_check.status == 200
+
 - name: Generate random string with length 12
   ansible.builtin.set_fact:
     random_string: "{{ lookup('community.general.random_string', length=12, lower=true, special=false) }}"
+  when: random_code_check.status == 400
 
 - name: Print generated random string
   ansible.builtin.debug:
     msg: "{{ random_string }}"
+  when: random_code_check.status == 400
+
+- name: Put random code of node in Vault
+  ansible.builtin.uri:
+    url: "{{ vault_url }}/v1/{{ vault_engine_name }}/data/sentinels/{{ ansible_hostname }}/attrs"
+    method: POST
+    body_format: json
+    status_code: [200, 202, 204]
+    return_content: true
+    validate_certs: "{{ vault_validate_certs }}"
+    headers:
+      Content-Type: application/json
+      X-Vault-Token: "{{ vault_token }}"
+    body: { "data": { "random_code": "{{ random_string }}" }}
+  when: random_code_check.status == 400
+
+- name: Add the user for SFAgent
+  ansible.builtin.user:
+    name: "{{ random_string }}"
+
+- name: Create data dir
+  ansible.builtin.file:
+    path: "/opt/{{ random_string }}"
+    state: directory
+    owner: "{{ random_string }}"
+    mode: '0700'
+
+- name: Copy SFAgent Binary
+  ansible.builtin.file:
+    path: "/opt/{{ random_string }}"
+    state: directory
+    owner: "{{ random_string }}"
+    mode: '0700'
+
+- name: Copy SFAgent Binary
+  ansible.builtin.copy:
+    src: "./compiled_agent/sfagent-{{ ansible_system }}-{{ ansible_userspace_architecture }}"
+    dest: "/opt/{{ random_string }}/{{ random_string }}"
+    owner: "{{ random_string }}"
+    mode: '0700'

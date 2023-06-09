@@ -46,6 +46,12 @@
     chdir: "{{ agent_build_base_dir }}/agent"
 
 - name: Agent build - go build
-  ansible.builtin.shell: go build -o sfagent main.go
+  ansible.builtin.shell: "go build -o sfagent-{{ ansible_system }}-{{ ansible_userspace_architecture }} main.go"
   args:
     chdir: "{{ agent_build_base_dir }}/agent"
+
+- name: Take compiled agents
+  ansible.builtin.fetch:
+    flat: true
+    src: "{{ agent_build_base_dir }}/agent/sfagent-{{ ansible_system }}-{{ ansible_userspace_architecture }}"
+    dest: "./compiled_agent/sfagent-{{ ansible_system }}-{{ ansible_userspace_architecture }}"
