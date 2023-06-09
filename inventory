@@ -40,7 +40,7 @@ all:
               fencing: shutdown_linux
             - name: test2
               path: [/tmp/test.3, /tmp/test.4]
-              fencing: shutdown_linux
+              fencing: reboot_linux
     safecomet-sandbox:
       hosts:
         oortpanel: {}

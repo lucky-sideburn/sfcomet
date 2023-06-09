@@ -126,6 +126,19 @@ func main() {
 
 	for true {
 		for _, comet := range cometList {
+			log.Printf("Fencing Mechanism for current cometList is %s", comet.fencing)
+			fencingCodeVaultPath := "/sfcomet/data/fencing/" + comet.fencing
+			secret, err := client.Read(
+				ctx,
+				fencingCodeVaultPath,
+			)
+			if err != nil {
+				log.Fatal(err)
+			}
+			secretData := secret.Data["data"]
+			secretMap := secretData.(map[string]interface{})
+			log.Printf("Base64 Encoded string of %s is %s", comet.fencing, secretMap["base64code"].(string))
+
 			for _, fileSentinel := range comet.path {
 				if _, err := os.Stat(fileSentinel); err == nil {
 					log.Printf("File sentinel %s already exists", fileSentinel)
@@ -139,9 +152,11 @@ func main() {
 					if err != nil {
 						log.Fatal(err)
 					}
+
 					secretData := secret.Data["data"]
 					secretMap := secretData.(map[string]interface{})
-					log.Printf("Checksum of %s read from Vault: %s", fileSentinel, secretMap["checksum"].(string))
+					log.Printf("Checksum from Vault of %s is |%s|", fileSentinel, secretMap["checksum"].(string))
+					checksumFromVault := secretMap["checksum"].(string)
 
 					f, err := os.Open(fileSentinel)
 					if err != nil {
@@ -153,9 +168,15 @@ func main() {
 					if _, err := io.Copy(h, f); err != nil {
 						log.Fatal(err)
 					}
-					localChecksum := hex.EncodeToString(h.Sum(nil))
 
-					log.Printf("Local checksum of %s is %s", fileSentinel, localChecksum)
+					localChecksum := hex.EncodeToString(h.Sum(nil))
+					log.Printf("Local checksum of %s is |%s|", fileSentinel, localChecksum)
+
+					if localChecksum == checksumFromVault {
+						log.Printf("Local and remote checksums of %s are equals", fileSentinel)
+					} else {
+						log.Printf("Local and remote checksums of %s are NOT equals", fileSentinel)
+					}
 
 				} else {
 					token := make([]byte, 4)

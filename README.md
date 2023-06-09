@@ -64,7 +64,7 @@ podman exec -it vault sh
 export VAULT_SKIP_VERIFY=true && vault operator init -recovery-shares=5 -recovery-threshold=3
 
 # Unseal Vault
-vault operator unseal
+export VAULT_SKIP_VERIFY=true && vault operator unseal
 
 # Check if Sealed is false
 # Unseal Key (will be hidden):
