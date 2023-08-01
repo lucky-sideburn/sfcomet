@@ -85,7 +85,7 @@ The Comet Prometheus Exporter is an exporter located into the OORT Panel machine
 
 ## High Availbility and support
 
-For HA and support contact info@safecomet.com
+For HA and support contact luckysideburn at gmail dot com
 
 ## To Do
 
